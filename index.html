@@ -1,0 +1,2560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geeks Hub SpaceOps Analytics — Booking & Operations Dashboard</title>
+  <style>
+    :root {
+      --bg-app: #f4f6fa;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-muted: #eef2f7;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --accent-primary: #4f46e5;
+      --accent-primary-hover: #4338ca;
+      --accent-soft: #eef2ff;
+      --accent-teal: #0d9488;
+      --accent-teal-soft: #f0fdfa;
+      --accent-amber: #d97706;
+      --accent-amber-soft: #fffbeb;
+      --accent-rose: #e11d48;
+      --accent-rose-soft: #fff1f2;
+      --accent-emerald: #059669;
+      --accent-emerald-soft: #ecfdf5;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --transition: 180ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    body[data-theme="dark"] {
+      --bg-app: #0b1020;
+      --bg-surface: #11182d;
+      --bg-subtle: #16203a;
+      --bg-muted: #1e2948;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #243154;
+      --border-strong: #334573;
+      --accent-primary: #6366f1;
+      --accent-primary-hover: #818cf8;
+      --accent-soft: rgba(99, 102, 241, 0.16);
+      --accent-teal: #2dd4bf;
+      --accent-teal-soft: rgba(45, 212, 191, 0.14);
+      --accent-amber: #fbbf24;
+      --accent-amber-soft: rgba(251, 191, 36, 0.15);
+      --accent-rose: #fb7185;
+      --accent-rose-soft: rgba(251, 113, 133, 0.15);
+      --accent-emerald: #34d399;
+      --accent-emerald-soft: rgba(52, 211, 153, 0.15);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+      --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    /* Header & Top Navigation */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-teal));
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.28);
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .doc-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--accent-soft);
+      color: var(--accent-primary);
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent);
+    }
+
+    .trainee-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .trainee-meta span strong {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 13px;
+      min-height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-subtle);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-primary-hover);
+      border-color: var(--accent-primary-hover);
+    }
+
+    .btn-soft {
+      background: var(--accent-soft);
+      border-color: transparent;
+      color: var(--accent-primary);
+    }
+
+    .btn-soft:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent-soft) 75%, var(--accent-primary) 25%);
+    }
+
+    .btn-danger-soft {
+      background: var(--accent-rose-soft);
+      border-color: transparent;
+      color: var(--accent-rose);
+    }
+
+    .btn-danger-soft:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent-rose-soft) 70%, var(--accent-rose) 30%);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      min-height: 30px;
+      font-size: 12px;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Mock REST & State Simulator Bar */
+    .simulator-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .sim-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sim-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      display: inline-block;
+      box-shadow: 0 0 0 3px var(--accent-emerald-soft);
+    }
+
+    .status-dot.loading {
+      background: var(--accent-amber);
+      box-shadow: 0 0 0 3px var(--accent-amber-soft);
+      animation: pulse 1.2s infinite;
+    }
+
+    .status-dot.error {
+      background: var(--accent-rose);
+      box-shadow: 0 0 0 3px var(--accent-rose-soft);
+    }
+
+    .status-dot.empty {
+      background: var(--text-muted);
+      box-shadow: 0 0 0 3px var(--bg-muted);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--bg-muted);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .seg-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .latency-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--bg-subtle);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .latency-control input[type="range"] {
+      width: 84px;
+      accent-color: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    .mono-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 15px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent-primary);
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg-muted);
+      color: var(--text-secondary);
+    }
+
+    .tab-btn.active .tab-badge {
+      background: var(--accent-soft);
+      color: var(--accent-primary);
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .kpi-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .kpi-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .pill-pos {
+      background: var(--accent-emerald-soft);
+      color: var(--accent-emerald);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .pill-warn {
+      background: var(--accent-amber-soft);
+      color: var(--accent-amber);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .pill-neg {
+      background: var(--accent-rose-soft);
+      color: var(--accent-rose);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    /* Charts & Cards */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .card-subtitle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 250px;
+    }
+
+    .chart-canvas-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 90;
+      background: var(--text-primary);
+      color: var(--bg-surface);
+      padding: 8px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: opacity 120ms ease;
+      max-width: 240px;
+      line-height: 1.4;
+    }
+
+    /* Tier Breakdown Strip */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .tier-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tier-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+      background: var(--bg-muted);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 320ms ease;
+    }
+
+    /* Data Table & Filters */
+    .filters-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .input, .select {
+      width: 100%;
+      height: 38px;
+      padding: 0 11px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .input:focus, .select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--bg-surface);
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    thead {
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      padding: 11px 13px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover {
+      color: var(--text-primary);
+    }
+
+    td {
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--bg-subtle);
+    }
+
+    td strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .badge-Confirmed { background: var(--accent-soft); color: var(--accent-primary); }
+    .badge-Completed { background: var(--accent-emerald-soft); color: var(--accent-emerald); }
+    .badge-Pending { background: var(--accent-amber-soft); color: var(--accent-amber); }
+    .badge-Cancelled { background: var(--accent-rose-soft); color: var(--accent-rose); }
+
+    .badge-tier {
+      background: var(--bg-muted);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .row-actions {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    /* Loading, Error, Empty States */
+    .state-box {
+      padding: 44px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--border-strong);
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid var(--bg-muted);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .skeleton-card {
+      height: 112px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-subtle) 50%, var(--bg-muted) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Hygiene & QA Layouts */
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .issue-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .issue-item {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12.5px;
+    }
+
+    .issue-item.conflict {
+      border-left: 4px solid var(--accent-rose);
+      background: var(--accent-rose-soft);
+    }
+
+    .issue-item.cleaned {
+      border-left: 4px solid var(--accent-amber);
+    }
+
+    .code-block {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text-primary);
+      line-height: 1.55;
+    }
+
+    .test-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 13px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      font-size: 13px;
+    }
+
+    .test-pass {
+      color: var(--accent-emerald);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .test-fail {
+      color: var(--accent-rose);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(15, 23, 42, 0.56);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 92vh;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: var(--bg-subtle);
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 95;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 360px;
+    }
+
+    .toast {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 13px;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 200ms ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 14px;
+      }
+      .kpi-value {
+        font-size: 22px;
+      }
+      .topbar-inner {
+        padding: 12px 14px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <!-- Sticky Top Navigation -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-block">
+        <div class="brand-logo" aria-hidden="true">GH</div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">Geeks Hub SpaceOps Analytics</h1>
+            <span class="doc-badge">GH-FT-2026-01</span>
+          </div>
+          <div class="trainee-meta">
+            <span><strong>Trainee:</strong> Farah Khaled Hassien (622600017)</span>
+            <span>•</span>
+            <span><strong>Institution:</strong> ECU Level 3</span>
+            <span>•</span>
+            <span><strong>Supervisor:</strong> Mohamed Raslan</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-primary" id="openCreateModalBtn">+ New Booking</button>
+        <button type="button" class="btn btn-soft" id="injectDirtyBtn" title="Append messy raw reservation logs to test cleaning & conflicts">
+          Inject Raw Logs
+        </button>
+        <button type="button" class="btn" id="themeToggleBtn" aria-label="Toggle color theme">
+          🌙 Dark Mode
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Mock REST & API State Simulator -->
+    <section class="simulator-bar" aria-label="Mock REST Service & API State Controls">
+      <div class="sim-group">
+        <span class="sim-label">
+          <span class="status-dot" id="apiStatusDot"></span>
+          Mock REST Service:
+        </span>
+        <div class="segmented" role="group" aria-label="Simulated API State">
+          <button type="button" class="seg-btn active" data-sim-mode="live">Live (200 OK)</button>
+          <button type="button" class="seg-btn" data-sim-mode="loading">Loading</button>
+          <button type="button" class="seg-btn" data-sim-mode="error">Error (503)</button>
+          <button type="button" class="seg-btn" data-sim-mode="empty">Empty ([])</button>
+        </div>
+      </div>
+
+      <div class="sim-group">
+        <label class="latency-control" for="latencySlider">
+          <span>Latency:</span>
+          <input type="range" id="latencySlider" min="0" max="2000" step="100" value="450" />
+          <strong id="latencyReadout">450ms</strong>
+        </label>
+        <span class="mono-pill" id="lastSyncReadout">Endpoint: GET /api/v1/bookings</span>
+        <button type="button" class="btn btn-sm" id="refetchBtn">↻ Sync API</button>
+      </div>
+    </section>
+
+    <!-- Primary Workspace Tabs -->
+    <nav class="nav-tabs" role="tablist" aria-label="Dashboard Sections">
+      <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="overview">
+        <span>📊 Overview & Analytics</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="bookings">
+        <span>📋 Reservation Log</span>
+        <span class="tab-badge" id="tabBookingsCount">0</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="hygiene">
+        <span>🧹 Data Hygiene & Conflicts</span>
+        <span class="tab-badge" id="tabIssuesCount">0</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="qa">
+        <span>🧪 Unit Tests & Architecture</span>
+        <span class="tab-badge" id="tabTestsBadge">QA</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: OVERVIEW & ANALYTICS -->
+    <section class="tab-panel active" id="panel-overview" role="tabpanel">
+      <div id="overviewStateContainer"></div>
+
+      <div id="overviewContent">
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <!-- Interactive Charts -->
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Reservation & Revenue Trend</h2>
+                <p class="card-subtitle">Daily booking hours & revenue across operational dates (hover points for details)</p>
+              </div>
+              <div class="segmented" id="trendMetricToggle">
+                <button type="button" class="seg-btn active" data-metric="revenue">Revenue ($)</button>
+                <button type="button" class="seg-btn" data-metric="hours">Booked Hours</button>
+                <button type="button" class="seg-btn" data-metric="count">Bookings</button>
+              </div>
+            </div>
+            <div class="chart-canvas-wrap" id="trendChartContainer"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Workspace Tier Distribution</h2>
+                <p class="card-subtitle">Revenue & booking volume by Shared Area, Meeting Room, and Office</p>
+              </div>
+              <span class="mono-pill" id="peakHourPill">Peak: --:--</span>
+            </div>
+            <div class="chart-canvas-wrap" id="categoryChartContainer"></div>
+          </div>
+        </div>
+
+        <!-- Tier Breakdown Cards -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Workspace Tier Performance Breakdown</h2>
+              <p class="card-subtitle">Aggregated total revenue, booking volume, and share of operational capacity</p>
+            </div>
+          </div>
+          <div class="tier-grid" id="tierBreakdownGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: RESERVATION LOG DATA TABLE -->
+    <section class="tab-panel" id="panel-bookings" role="tabpanel">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Reservation Log Data Table</h2>
+            <p class="card-subtitle">Search by Booking ID or Client, filter by workspace tier, status, or date, and manage reservations</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-sm" id="resetFiltersBtn">Clear Filters</button>
+            <button type="button" class="btn btn-primary btn-sm" id="openCreateModalBtn2">+ Add Reservation</button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <input type="search" class="input" id="searchInput" placeholder="Search ID (e.g. BK-101) or Client..." aria-label="Search bookings by ID or Client" />
+          <select class="select" id="categoryFilter" aria-label="Filter by Space Category">
+            <option value="ALL">All Space Categories</option>
+            <option value="Shared Area">Shared Area</option>
+            <option value="Meeting Room">Meeting Room</option>
+            <option value="Office">Office</option>
+          </select>
+          <select class="select" id="statusFilter" aria-label="Filter by Status">
+            <option value="ALL">All Statuses</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <input type="date" class="input" id="dateFilter" aria-label="Filter by Date" />
+        </div>
+
+        <div id="tableStateContainer"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DATA HYGIENE & CONFLICT INSPECTOR -->
+    <section class="tab-panel" id="panel-hygiene" role="tabpanel">
+      <div class="kpi-grid" id="hygieneKpiGrid"></div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Time-Slot Overlap & Conflict Warnings</h2>
+              <p class="card-subtitle">Detecting overlapping active reservations within the same space tier & window</p>
+            </div>
+          </div>
+          <div class="issue-list" id="conflictList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Data Cleaning & Normalization Log</h2>
+              <p class="card-subtitle">Missing fields imputed, date strings normalized to ISO, and durations/revenues validated</p>
+            </div>
+          </div>
+          <div class="issue-list" id="cleaningLogList"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Booking JSON / SQL Schema Specification</h2>
+            <p class="card-subtitle">Milestone 1 canonical schema for reservations (ID, Client, Space Category, Date/Time, Duration, Revenue, Status)</p>
+          </div>
+        </div>
+        <div class="code-block" id="schemaCodeBlock"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: UNIT TESTS & ARCHITECTURE -->
+    <section class="tab-panel" id="panel-qa" role="tabpanel">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Interactive Unit Test Suite</h2>
+              <p class="card-subtitle">Live assertions on date normalization, missing-value cleaning, conflict detection, and KPI formulas</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="runTestsBtn">▶ Run Unit Tests</button>
+          </div>
+          <div id="testSummaryBanner" class="mono-pill" style="align-self:flex-start;">Ready to execute</div>
+          <div class="issue-list" id="testResultsList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">System Architecture & Git Workflow</h2>
+              <p class="card-subtitle">Milestone 1 & Milestone 4 delivery structure for Geeks Hub (GH-FT-2026-01)</p>
+            </div>
+          </div>
+          <div class="code-block" id="architectureDocBlock"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Create / Edit Booking Modal -->
+  <div class="modal-backdrop" id="bookingModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="card-title" id="modalTitle">New Reservation</h3>
+        <button type="button" class="btn btn-sm" id="closeModalBtn" aria-label="Close modal">✕</button>
+      </div>
+      <form id="bookingForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="fBookingId">Booking ID</label>
+              <input type="text" class="input" id="fBookingId" required placeholder="BK-115" />
+            </div>
+            <div class="form-field">
+              <label for="fClient">Client / Team Name</label>
+              <input type="text" class="input" id="fClient" required placeholder="e.g. Nile FinTech Lab" />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="fCategory">Space Category</label>
+              <select class="select" id="fCategory">
+                <option value="Shared Area">Shared Area</option>
+                <option value="Meeting Room">Meeting Room</option>
+                <option value="Office">Office</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="fStatus">Status</label>
+              <select class="select" id="fStatus">
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="fDate">Date (YYYY-MM-DD)</label>
+              <input type="date" class="input" id="fDate" required />
+            </div>
+            <div class="form-field">
+              <label for="fTime">Start Time (HH:MM)</label>
+              <input type="time" class="input" id="fTime" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="fDuration">Duration (Hours)</label>
+              <input type="number" class="input" id="fDuration" min="0.5" max="16" step="0.5" value="2" required />
+            </div>
+            <div class="form-field">
+              <label for="fRevenue">Revenue (USD $)</label>
+              <input type="number" class="input" id="fRevenue" min="0" step="5" value="120" required />
+            </div>
+          </div>
+          <div id="modalConflictHint" style="font-size:12px; color:var(--accent-amber);"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveBookingBtn">Save Reservation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hover Chart Tooltip & Toast Container -->
+  <div class="chart-tooltip" id="chartTooltip"></div>
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script>
+    /**
+     * =========================================================================
+     * GEEKS HUB SPACEOPS ANALYTICS DASHBOARD
+     * Document ID: GH-FT-2026-01
+     * Trainee: Farah Khaled Hassien (622600017) | ECU Level 3
+     * Supervisor: Mohamed Raslan
+     * =========================================================================
+     */
+
+    const VALID_CATEGORIES = ["Shared Area", "Meeting Room", "Office"];
+    const VALID_STATUSES = ["Confirmed", "Completed", "Pending", "Cancelled"];
+
+    // Initial raw seed logs (includes mixed date formats, missing values, and an intentional overlap)
+    const INITIAL_RAW_LOGS = [
+      { id: "BK-101", client: "Cairo Cloud Labs", category: "Office", dateTime: "2026-11-16 09:00", duration: 4, revenue: 280, status: "Completed" },
+      { id: "BK-102", client: "Nile Product Studio", category: "Meeting Room", dateTime: "16/11/2026 10:30", duration: 2, revenue: 140, status: "Completed" },
+      { id: "BK-103", client: "Sara Mansour", category: "Shared Area", dateTime: "2026-11-16T11:00:00", duration: 3, revenue: 60, status: "Completed" },
+      { id: "BK-104", client: "Delta AI Collective", category: "Meeting Room", dateTime: "2026-11-16 11:30", duration: 2, revenue: 150, status: "Confirmed" }, // Overlaps BK-102 in Meeting Room
+      { id: "BK-105", client: "Omar El-Sayed", category: "Shared Area", dateTime: "2026-11-17 09:30", duration: 5, revenue: 95, status: "Cancelled" },
+      { id: "BK-106", client: "Horizon Media Group", category: "Office", dateTime: "17/11/2026 10:00", duration: 6, revenue: 420, status: "Completed" },
+      { id: "BK-107", client: "Kinetix Robotics", category: "Meeting Room", dateTime: "2026-11-17 14:00", duration: 3, revenue: 210, status: "Confirmed" },
+      { id: "BK-108", client: "   ", category: "Shared Area", dateTime: "2026-11-18 09:00", duration: 4, revenue: null, status: "Completed" }, // Missing client & null revenue
+      { id: "BK-109", client: "Pyramids Ventures", category: "Office", dateTime: "2026-11-18 11:00", duration: 5, revenue: 350, status: "Confirmed" },
+      { id: "BK-110", client: "Laila Hassan", category: "Meeting Room", dateTime: "2026-11-18 15:00", duration: 2, revenue: 130, status: "Pending" },
+      { id: "BK-111", client: "CodeCraft Academy", category: "Shared Area", dateTime: "19/11/2026 10:00", duration: 4, revenue: 80, status: "Cancelled" },
+      { id: "BK-112", client: "Alexandria FinOps", category: "Office", dateTime: "2026-11-19 13:00", duration: 4, revenue: 290, status: "Completed" },
+      { id: "BK-113", client: "Tarek Mahmoud", category: "Shared Area", dateTime: "2026-11-20 09:00", duration: 3, revenue: 65, status: "Confirmed" },
+      { id: "BK-114", client: "Nova Health Tech", category: "Meeting Room", dateTime: "2026-11-20 11:00", duration: 3, revenue: 225, status: "Confirmed" }
+    ];
+
+    const DIRTY_BATCH_SAMPLES = [
+      { id: "BK-201", client: "Giza Data Guild", category: "Meeting Room", dateTime: "20/11/2026 11:30", duration: 2, revenue: 160, status: "Confirmed" },
+      { id: "BK-202", client: "", category: "shared area", dateTime: "2026-11-20 14:00", duration: -2, revenue: undefined, status: "Completed" },
+      { id: "BK-203", client: "Maadi Design Hub", category: "Office", dateTime: "2026-11-20 13:30", duration: 3, revenue: 240, status: "Confirmed" }
+    ];
+
+    // Centralized Application State
+    const state = {
+      rawLogs: JSON.parse(JSON.stringify(INITIAL_RAW_LOGS)),
+      dirtyBatchCounter: 0,
+      simMode: "live", // "live" | "loading" | "error" | "empty"
+      latencyMs: 450,
+      isFetching: false,
+      apiError: null,
+      activeTab: "overview",
+      trendMetric: "revenue",
+      theme: "light",
+      filters: {
+        search: "",
+        category: "ALL",
+        status: "ALL",
+        date: ""
+      },
+      sort: {
+        key: "dateTime",
+        dir: "asc"
+      },
+      editingId: null
+    };
+
+    /**
+     * =========================================================================
+     * 1. DATA CLEANING & VALIDATION PIPELINE (Milestone 2)
+     * =========================================================================
+     */
+
+    /**
+     * Normalizes diverse date/time strings into { isoDate: "YYYY-MM-DD", time: "HH:MM", dateTime: "YYYY-MM-DD HH:MM", minutesFromMidnight: number }
+     */
+    function normalizeDateTime(rawValue) {
+      const fallback = {
+        date: "2026-11-20",
+        time: "09:00",
+        dateTime: "2026-11-20 09:00",
+        startMinutes: 9 * 60,
+        wasNormalized: true,
+        reason: "Invalid or missing date/time defaulted to 2026-11-20 09:00"
+      };
+
+      if (!rawValue || typeof rawValue !== "string") return fallback;
+      const trimmed = rawValue.trim();
+
+      // Match DD/MM/YYYY [HH:MM]
+      const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[T\s]+(\d{1,2}):(\d{2}))?/);
+      if (slashMatch) {
+        const day = String(slashMatch[1]).padStart(2, "0");
+        const month = String(slashMatch[2]).padStart(2, "0");
+        const year = slashMatch[3];
+        const hour = String(slashMatch[4] ?? "09").padStart(2, "0");
+        const min = String(slashMatch[5] ?? "00").padStart(2, "0");
+        const hNum = Math.min(23, Math.max(0, parseInt(hour, 10)));
+        const mNum = Math.min(59, Math.max(0, parseInt(min, 10)));
+        const isoDate = `${year}-${month}-${day}`;
+        const normTime = `${String(hNum).padStart(2, "0")}:${String(mNum).padStart(2, "0")}`;
+        return {
+          date: isoDate,
+          time: normTime,
+          dateTime: `${isoDate} ${normTime}`,
+          startMinutes: hNum * 60 + mNum,
+          wasNormalized: true,
+          reason: `Converted "${trimmed}" → "${isoDate} ${normTime}"`
+        };
+      }
+
+      // Match YYYY-MM-DD[T ]HH:MM(:SS)?
+      const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s]+(\d{1,2}):(\d{2}))?/);
+      if (isoMatch) {
+        const year = isoMatch[1];
+        const month = isoMatch[2];
+        const day = isoMatch[3];
+        const hour = isoMatch[4] !== undefined ? String(isoMatch[4]).padStart(2, "0") : "09";
+        const min = isoMatch[5] !== undefined ? String(isoMatch[5]).padStart(2, "0") : "00";
+        const hNum = Math.min(23, Math.max(0, parseInt(hour, 10)));
+        const mNum = Math.min(59, Math.max(0, parseInt(min, 10)));
+        const isoDate = `${year}-${month}-${day}`;
+        const normTime = `${String(hNum).padStart(2, "0")}:${String(mNum).padStart(2, "0")}`;
+        const hasTOrSeconds = trimmed.includes("T") || trimmed.split(":").length > 2 || !isoMatch[4];
+        return {
+          date: isoDate,
+          time: normTime,
+          dateTime: `${isoDate} ${normTime}`,
+          startMinutes: hNum * 60 + mNum,
+          wasNormalized: hasTOrSeconds,
+          reason: hasTOrSeconds ? `Standardized timestamp "${trimmed}" → "${isoDate} ${normTime}"` : null
+        };
+      }
+
+      return fallback;
+    }
+
+    /**
+     * Normalizes workspace tier string to canonical categories.
+     */
+    function normalizeCategory(rawCategory) {
+      if (!rawCategory || typeof rawCategory !== "string") {
+        return { category: "Shared Area", adjusted: true, reason: "Missing category defaulted to Shared Area" };
+      }
+      const clean = rawCategory.trim().toLowerCase();
+      if (clean.includes("meet")) return { category: "Meeting Room", adjusted: rawCategory !== "Meeting Room", reason: `Mapped "${rawCategory}" → "Meeting Room"` };
+      if (clean.includes("off")) return { category: "Office", adjusted: rawCategory !== "Office", reason: `Mapped "${rawCategory}" → "Office"` };
+      if (clean.includes("share") || clean.includes("desk") || clean.includes("cowork")) {
+        return { category: "Shared Area", adjusted: rawCategory !== "Shared Area", reason: `Mapped "${rawCategory}" → "Shared Area"` };
+      }
+      return { category: "Shared Area", adjusted: true, reason: `Unknown tier "${rawCategory}" defaulted to Shared Area` };
+    }
+
+    /**
+     * Cleans and validates raw reservation logs, returning cleaned records, cleaning audit trail, and conflict warnings.
+     */
+    function cleanAndValidateBookings(rawRecords) {
+      const cleaningNotes = [];
+      const seenIds = new Set();
+
+      const cleaned = rawRecords.map((rec, idx) => {
+        const notes = [];
+        let id = typeof rec.id === "string" && rec.id.trim() ? rec.id.trim().toUpperCase() : `BK-${900 + idx + 1}`;
+        if (seenIds.has(id)) {
+          const uniqueId = `${id}-DUP${idx + 1}`;
+          notes.push(`Duplicate ID "${id}" renamed to "${uniqueId}"`);
+          id = uniqueId;
+        }
+        seenIds.add(id);
+
+        let client = typeof rec.client === "string" ? rec.client.trim() : "";
+        if (!client) {
+          client = "Walk-in Member (Unassigned)";
+          notes.push("Missing client name imputed as 'Walk-in Member (Unassigned)'");
+        }
+
+        const catNorm = normalizeCategory(rec.category);
+        if (catNorm.adjusted && catNorm.reason) notes.push(catNorm.reason);
+
+        const dtNorm = normalizeDateTime(rec.dateTime);
+        if (dtNorm.wasNormalized && dtNorm.reason) notes.push(dtNorm.reason);
+
+        let duration = Number(rec.duration);
+        if (!Number.isFinite(duration) || duration <= 0) {
+          duration = 1;
+          notes.push(`Invalid duration (${rec.duration}) corrected to 1.0h`);
+        }
+
+        const tierBaseRates = { "Shared Area": 22, "Meeting Room": 70, "Office": 75 };
+        let revenue = rec.revenue === null || rec.revenue === undefined || rec.revenue === "" ? NaN : Number(rec.revenue);
+        if (!Number.isFinite(revenue) || revenue < 0) {
+          revenue = Math.round(duration * (tierBaseRates[catNorm.category] || 30));
+          notes.push(`Missing/invalid revenue estimated at $${revenue} based on ${duration}h in ${catNorm.category}`);
+        }
+
+        let status = VALID_STATUSES.includes(rec.status) ? rec.status : "Confirmed";
+        if (!VALID_STATUSES.includes(rec.status)) {
+          notes.push(`Status "${rec.status}" normalized to "Confirmed"`);
+        }
+
+        const startMinutes = dtNorm.startMinutes;
+        const endMinutes = Math.min(24 * 60, startMinutes + Math.round(duration * 60));
+
+        if (notes.length > 0) {
+          cleaningNotes.push({ id, client, notes });
+        }
+
+        return {
+          id,
+          client,
+          category: catNorm.category,
+          date: dtNorm.date,
+          time: dtNorm.time,
+          dateTime: dtNorm.dateTime,
+          startMinutes,
+          endMinutes,
+          duration,
+          revenue,
+          status,
+          hasCleaningNotes: notes.length > 0,
+          hasConflict: false,
+          conflictWith: []
+        };
+      });
+
+      // Time-slot overlap / conflict detection per Space Category on the same date (ignoring Cancelled)
+      const conflicts = [];
+      const activeBookings = cleaned.filter((b) => b.status !== "Cancelled");
+
+      for (let i = 0; i < activeBookings.length; i++) {
+        for (let j = i + 1; j < activeBookings.length; j++) {
+          const a = activeBookings[i];
+          const b = activeBookings[j];
+          if (a.date === b.date && a.category === b.category) {
+            const overlaps = a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes;
+            if (overlaps) {
+              const overlapStart = Math.max(a.startMinutes, b.startMinutes);
+              const overlapEnd = Math.min(a.endMinutes, b.endMinutes);
+              const overlapMinutes = Math.max(15, overlapEnd - overlapStart);
+
+              a.hasConflict = true;
+              b.hasConflict = true;
+              a.conflictWith.push(b.id);
+              b.conflictWith.push(a.id);
+
+              conflicts.push({
+                id: `${a.id}__${b.id}`,
+                date: a.date,
+                category: a.category,
+                bookingA: a.id,
+                clientA: a.client,
+                windowA: `${a.time} (${a.duration}h)`,
+                bookingB: b.id,
+                clientB: b.client,
+                windowB: `${b.time} (${b.duration}h)`,
+                overlapMinutes
+              });
+            }
+          }
+        }
+      }
+
+      return { cleaned, cleaningNotes, conflicts };
+    }
+
+    /**
+     * =========================================================================
+     * 2. ANALYTICS & KPI ENGINE (Milestone 2)
+     * =========================================================================
+     */
+    function computeAnalytics(bookings) {
+      const totalBookings = bookings.length;
+      if (totalBookings === 0) {
+        return {
+          totalBookings: 0,
+          activeBookings: 0,
+          cancelledCount: 0,
+          totalRevenue: 0,
+          cancellationRate: 0,
+          occupancyRate: 0,
+          peakHourLabel: "N/A",
+          peakHourHours: 0,
+          totalBookedHours: 0,
+          byCategory: {
+            "Shared Area": { revenue: 0, count: 0, hours: 0 },
+            "Meeting Room": { revenue: 0, count: 0, hours: 0 },
+            "Office": { revenue: 0, count: 0, hours: 0 }
+          },
+          dailySeries: [],
+          hourlyUtilization: Array.from({ length: 14 }, (_, idx) => ({ hour: idx + 8, hours: 0 }))
+        };
+      }
+
+      const nonCancelled = bookings.filter((b) => b.status !== "Cancelled");
+      const cancelledCount = bookings.filter((b) => b.status === "Cancelled").length;
+
+      // Revenue recognizes Confirmed & Completed bookings
+      const totalRevenue = bookings
+        .filter((b) => b.status === "Confirmed" || b.status === "Completed")
+        .reduce((sum, b) => sum + b.revenue, 0);
+
+      const cancellationRate = (cancelledCount / totalBookings) * 100;
+
+      // Aggregate by workspace tier
+      const byCategory = {
+        "Shared Area": { revenue: 0, count: 0, hours: 0 },
+        "Meeting Room": { revenue: 0, count: 0, hours: 0 },
+        "Office": { revenue: 0, count: 0, hours: 0 }
+      };
+
+      const dailyMap = new Map();
+      // Operating hours 08:00 to 21:00 (14 hours/day)
+      const hourlyMap = new Map();
+      for (let h = 8; h <= 21; h++) hourlyMap.set(h, 0);
+
+      let totalBookedHours = 0;
+
+      nonCancelled.forEach((b) => {
+        totalBookedHours += b.duration;
+        if (byCategory[b.category]) {
+          byCategory[b.category].count += 1;
+          byCategory[b.category].hours += b.duration;
+          if (b.status === "Confirmed" || b.status === "Completed") {
+            byCategory[b.category].revenue += b.revenue;
+          }
+        }
+
+        // Daily aggregation
+        const currentDay = dailyMap.get(b.date) || { date: b.date, revenue: 0, hours: 0, count: 0 };
+        currentDay.hours += b.duration;
+        currentDay.count += 1;
+        if (b.status === "Confirmed" || b.status === "Completed") {
+          currentDay.revenue += b.revenue;
+        }
+        dailyMap.set(b.date, currentDay);
+
+        // Hourly utilization (08:00 - 21:00)
+        const startH = Math.floor(b.startMinutes / 60);
+        const endH = Math.ceil(b.endMinutes / 60);
+        for (let h = Math.max(8, startH); h < Math.min(22, endH); h++) {
+          hourlyMap.set(h, (hourlyMap.get(h) || 0) + 1);
+        }
+      });
+
+      const dailySeries = Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+      const uniqueDays = Math.max(1, dailySeries.length);
+
+      // Total facility capacity across 3 workspace tiers * 12 core hours/day * uniqueDays
+      const totalCapacityHours = uniqueDays * 3 * 12;
+      const occupancyRate = Math.min(100, (totalBookedHours / totalCapacityHours) * 100);
+
+      // Peak utilization hour
+      let peakHour = 9;
+      let peakLoad = -1;
+      hourlyMap.forEach((load, hour) => {
+        if (load > peakLoad) {
+          peakLoad = load;
+          peakHour = hour;
+        }
+      });
+
+      const peakHourLabel = `${String(peakHour).padStart(2, "0")}:00`;
+
+      return {
+        totalBookings,
+        activeBookings: nonCancelled.length,
+        cancelledCount,
+        totalRevenue,
+        cancellationRate,
+        occupancyRate,
+        peakHourLabel,
+        peakHourLoad: Math.max(0, peakLoad),
+        totalBookedHours,
+        byCategory,
+        dailySeries
+      };
+    }
+
+    /**
+     * =========================================================================
+     * 3. MOCK REST API SERVICE SIMULATOR (Milestone 1)
+     * =========================================================================
+     */
+    function mockFetchBookings() {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (state.simMode === "error") {
+            reject(new Error("HTTP 503 Service Unavailable — Mock REST Gateway timed out while reading /api/v1/bookings."));
+            return;
+          }
+          if (state.simMode === "empty") {
+            resolve([]);
+            return;
+          }
+          resolve(JSON.parse(JSON.stringify(state.rawLogs)));
+        }, state.latencyMs);
+      });
+    }
+
+    async function syncFromMockApi(showToast = false) {
+      state.isFetching = true;
+      state.apiError = null;
+      renderAll();
+
+      try {
+        const payload = await mockFetchBookings();
+        state.isFetching = false;
+        state.apiError = null;
+        const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        document.getElementById("lastSyncReadout").textContent = `200 OK • Synced ${nowStr} (${payload.length} logs)`;
+        if (showToast) {
+          showToastMessage(`Fetched ${payload.length} reservation logs from Mock REST API (${state.latencyMs}ms).`);
+        }
+        renderAll(payload);
+      } catch (err) {
+        state.isFetching = false;
+        state.apiError = err.message;
+        document.getElementById("lastSyncReadout").textContent = `503 Error • /api/v1/bookings`;
+        if (showToast) {
+          showToastMessage(err.message, true);
+        }
+        renderAll([]);
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 4. INTERACTIVE CHARTS (SVG) (Milestone 3)
+     * =========================================================================
+     */
+    function renderTrendChart(dailySeries, metric) {
+      const container = document.getElementById("trendChartContainer");
+      if (!dailySeries || dailySeries.length === 0) {
+        container.innerHTML = `<div class="state-box"><p style="color:var(--text-muted)">No time-series data to plot.</p></div>`;
+        return;
+      }
+
+      const width = 680;
+      const height = 250;
+      const padLeft = 48;
+      const padRight = 22;
+      const padTop = 20;
+      const padBottom = 38;
+      const plotW = width - padLeft - padRight;
+      const plotH = height - padTop - padBottom;
+
+      const getVal = (d) => (metric === "revenue" ? d.revenue : metric === "hours" ? d.hours : d.count);
+      const formatVal = (v) => (metric === "revenue" ? `$${v.toLocaleString()}` : metric === "hours" ? `${v}h` : `${v}`);
+
+      const maxVal = Math.max(10, ...dailySeries.map(getVal)) * 1.15;
+      const stepX = dailySeries.length > 1 ? plotW / (dailySeries.length - 1) : plotW / 2;
+
+      const points = dailySeries.map((d, i) => {
+        const x = dailySeries.length > 1 ? padLeft + i * stepX : padLeft + plotW / 2;
+        const val = getVal(d);
+        const y = padTop + plotH - (val / maxVal) * plotH;
+        return { x, y, val, d };
+      });
+
+      const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+      const areaPath =
+        points.length > 0
+          ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${(padTop + plotH).toFixed(1)} L ${points[0].x.toFixed(1)} ${(padTop + plotH).toFixed(1)} Z`
+          : "";
+
+      const gridTicks = [0, 0.25, 0.5, 0.75, 1].map((t) => {
+        const y = padTop + plotH - t * plotH;
+        const tickVal = Math.round(maxVal * t);
+        return `
+          <line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${width - padRight}" y2="${y.toFixed(1)}" stroke="var(--border-color)" stroke-dasharray="3,3" />
+          <text x="${padLeft - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="var(--text-muted)">${formatVal(tickVal)}</text>
+        `;
+      }).join("");
+
+      const xLabels = points.map((p) => {
+        const shortDate = p.d.date.slice(5); // MM-DD
+        return `<text x="${p.x.toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="11" fill="var(--text-muted)">${shortDate}</text>`;
+      }).join("");
+
+      const dots = points.map((p) => `
+        <circle
+          cx="${p.x.toFixed(1)}"
+          cy="${p.y.toFixed(1)}"
+          r="5"
+          fill="var(--accent-primary)"
+          stroke="var(--bg-surface)"
+          stroke-width="2"
+          style="cursor:pointer;"
+          data-tip-title="${p.d.date}"
+          data-tip-body="Revenue: $${p.d.revenue} • Hours: ${p.d.hours}h • Bookings: ${p.d.count}"
+        />
+      `).join("");
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Daily reservation trend chart">
+          <defs>
+            <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.01" />
+            </linearGradient>
+          </defs>
+          ${gridTicks}
+          <path d="${areaPath}" fill="url(#trendGrad)" />
+          <path d="${linePath}" fill="none" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          ${xLabels}
+          ${dots}
+        </svg>
+      `;
+
+      bindChartTooltips(container);
+    }
+
+    function renderCategoryChart(byCategory) {
+      const container = document.getElementById("categoryChartContainer");
+      const tiers = [
+        { name: "Shared Area", color: "#0d9488" },
+        { name: "Meeting Room", color: "#4f46e5" },
+        { name: "Office", color: "#d97706" }
+      ];
+
+      const maxRev = Math.max(50, ...tiers.map((t) => byCategory[t.name]?.revenue || 0));
+      const width = 440;
+      const height = 250;
+      const padLeft = 104;
+      const padRight = 56;
+      const barH = 38;
+      const gap = 24;
+
+      const bars = tiers.map((t, idx) => {
+        const stats = byCategory[t.name] || { revenue: 0, count: 0, hours: 0 };
+        const y = 26 + idx * (barH + gap);
+        const fullW = width - padLeft - padRight;
+        const barW = Math.max(4, (stats.revenue / maxRev) * fullW);
+
+        return `
+          <text x="${padLeft - 10}" y="${y + barH / 2 + 4}" text-anchor="end" font-size="12" font-weight="600" fill="var(--text-primary)">${t.name}</text>
+          <rect x="${padLeft}" y="${y}" width="${fullW}" height="${barH}" rx="8" fill="var(--bg-muted)" />
+          <rect
+            x="${padLeft}"
+            y="${y}"
+            width="${barW.toFixed(1)}"
+            height="${barH}"
+            rx="8"
+            fill="${t.color}"
+            style="cursor:pointer; transition: width 280ms ease;"
+            data-tip-title="${t.name}"
+            data-tip-body="Revenue: $${stats.revenue.toLocaleString()} • Bookings: ${stats.count} • Hours: ${stats.hours}h"
+          />
+          <text x="${padLeft + barW + 8}" y="${y + barH / 2 + 4}" font-size="11.5" font-weight="700" fill="var(--text-secondary)">$${stats.revenue.toLocaleString()}</text>
+        `;
+      }).join("");
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Workspace category revenue chart">
+          ${bars}
+        </svg>
+      `;
+
+      bindChartTooltips(container);
+    }
+
+    function bindChartTooltips(container) {
+      const tooltip = document.getElementById("chartTooltip");
+      const targets = container.querySelectorAll("[data-tip-title]");
+      targets.forEach((el) => {
+        el.addEventListener("mousemove", (e) => {
+          tooltip.innerHTML = `<strong>${el.getAttribute("data-tip-title")}</strong><br/><span>${el.getAttribute("data-tip-body")}</span>`;
+          tooltip.style.left = `${Math.min(window.innerWidth - 250, e.clientX + 12)}px`;
+          tooltip.style.top = `${Math.max(10, e.clientY - 46)}px`;
+          tooltip.style.opacity = "1";
+        });
+        el.addEventListener("mouseleave", () => {
+          tooltip.style.opacity = "0";
+        });
+      });
+    }
+
+    /**
+     * =========================================================================
+     * 5. UI RENDERING (KPIs, TABLE, HYGIENE & QA)
+     * =========================================================================
+     */
+    function updateSimulatorIndicator() {
+      const dot = document.getElementById("apiStatusDot");
+      dot.className = "status-dot";
+      if (state.isFetching || state.simMode === "loading") {
+        dot.classList.add("loading");
+      } else if (state.simMode === "error" || state.apiError) {
+        dot.classList.add("error");
+      } else if (state.simMode === "empty") {
+        dot.classList.add("empty");
+      }
+
+      document.querySelectorAll("[data-sim-mode]").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-sim-mode") === state.simMode);
+      });
+    }
+
+    function renderOverview(cleaned, analytics, conflicts, cleaningNotes) {
+      const stateContainer = document.getElementById("overviewStateContainer");
+      const content = document.getElementById("overviewContent");
+
+      if (state.isFetching || state.simMode === "loading") {
+        content.style.display = "none";
+        stateContainer.innerHTML = `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Loading Analytics Pipeline...</h2>
+                <p class="card-subtitle">Simulating ${state.latencyMs}ms network latency from /api/v1/bookings</p>
+              </div>
+              <div class="spinner"></div>
+            </div>
+            <div class="skeleton-grid">
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.simMode === "error" || state.apiError) {
+        content.style.display = "none";
+        stateContainer.innerHTML = `
+          <div class="state-box">
+            <strong style="font-size:16px; color:var(--accent-rose);">⚠ Mock API Error State</strong>
+            <p style="color:var(--text-secondary); max-width:480px;">${state.apiError || "Failed to load reservation stream."}</p>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="switchSimMode('live')">Switch to Live (200 OK)</button>
+              <button type="button" class="btn btn-sm" onclick="syncFromMockApi(true)">Retry Request</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.simMode === "empty" || cleaned.length === 0) {
+        content.style.display = "none";
+        stateContainer.innerHTML = `
+          <div class="state-box">
+            <strong style="font-size:16px;">📭 No Reservation Records Found</strong>
+            <p style="color:var(--text-muted); max-width:440px;">The mock REST endpoint returned an empty dataset. Restore sample bookings or add a new reservation.</p>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="restoreDefaultDataset()">Restore Sample Logs</button>
+              <button type="button" class="btn btn-sm" onclick="openBookingModal()">+ Add Booking</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      stateContainer.innerHTML = "";
+      content.style.display = "flex";
+      content.style.flexDirection = "column";
+      content.style.gap = "20px";
+
+      document.getElementById("peakHourPill").textContent = `Peak: ${analytics.peakHourLabel}`;
+
+      const kpiGrid = document.getElementById("kpiGrid");
+      kpiGrid.innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Recognized Revenue</span>
+            <span class="kpi-icon" style="background:var(--accent-emerald-soft); color:var(--accent-emerald);">$</span>
+          </div>
+          <div class="kpi-value">$${analytics.totalRevenue.toLocaleString()}</div>
+          <div class="kpi-sub">
+            <span>Confirmed & Completed</span>
+            <span class="pill-pos">${analytics.activeBookings} Active</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Space Occupancy Rate</span>
+            <span class="kpi-icon" style="background:var(--accent-soft); color:var(--accent-primary);">%</span>
+          </div>
+          <div class="kpi-value">${analytics.occupancyRate.toFixed(1)}%</div>
+          <div class="kpi-sub">
+            <span>${analytics.totalBookedHours.toFixed(1)}h booked</span>
+            <span class="pill-pos">Peak ${analytics.peakHourLabel}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Cancellation Rate</span>
+            <span class="kpi-icon" style="background:var(--accent-rose-soft); color:var(--accent-rose);">✕</span>
+          </div>
+          <div class="kpi-value">${analytics.cancellationRate.toFixed(1)}%</div>
+          <div class="kpi-sub">
+            <span>${analytics.cancelledCount} of ${analytics.totalBookings} logs</span>
+            <span class="${analytics.cancellationRate > 20 ? "pill-neg" : "pill-warn"}">${analytics.cancelledCount} Cancelled</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Peak Utilization Hour</span>
+            <span class="kpi-icon" style="background:var(--accent-amber-soft); color:var(--accent-amber);">⏱</span>
+          </div>
+          <div class="kpi-value">${analytics.peakHourLabel}</div>
+          <div class="kpi-sub">
+            <span>${analytics.peakHourLoad} concurrent slot(s)</span>
+            <span class="pill-warn">${conflicts.length} Conflict(s)</span>
+          </div>
+        </div>
+      `;
+
+      renderTrendChart(analytics.dailySeries, state.trendMetric);
+      renderCategoryChart(analytics.byCategory);
+
+      // Tier Breakdown Grid
+      const tierGrid = document.getElementById("tierBreakdownGrid");
+      const totalTierRev = Math.max(1, analytics.totalRevenue);
+      const tierMeta = [
+        { name: "Shared Area", color: "#0d9488", desc: "Hot desks, focus pods & community tables" },
+        { name: "Meeting Room", color: "#4f46e5", desc: "Client rooms, sprint huddles & AV spaces" },
+        { name: "Office", color: "#d97706", desc: "Private team suites & dedicated studios" }
+      ];
+
+      tierGrid.innerHTML = tierMeta.map((t) => {
+        const s = analytics.byCategory[t.name];
+        const sharePct = Math.min(100, Math.round((s.revenue / totalTierRev) * 100));
+        return `
+          <div class="tier-card">
+            <div class="tier-head">
+              <span>${t.name}</span>
+              <span style="font-family:var(--font-mono); color:var(--text-primary);">$${s.revenue.toLocaleString()}</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted);">${t.desc}</div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:${sharePct}%; background:${t.color};"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary);">
+              <span><strong>${s.count}</strong> bookings (${s.hours}h)</span>
+              <span><strong>${sharePct}%</strong> revenue share</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderBookingsTable(cleaned) {
+      const container = document.getElementById("tableStateContainer");
+
+      if (state.isFetching || state.simMode === "loading") {
+        container.innerHTML = `
+          <div class="state-box">
+            <div class="spinner"></div>
+            <strong>Loading reservation logs...</strong>
+            <span style="font-size:12.5px; color:var(--text-muted);">Simulated latency: ${state.latencyMs}ms</span>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.simMode === "error" || state.apiError) {
+        container.innerHTML = `
+          <div class="state-box">
+            <strong style="color:var(--accent-rose);">Failed to load Reservation Log</strong>
+            <p style="font-size:13px; color:var(--text-secondary);">${state.apiError || "Mock REST server error."}</p>
+            <button type="button" class="btn btn-primary btn-sm" onclick="switchSimMode('live')">Recover (200 OK)</button>
+          </div>
+        `;
+        return;
+      }
+
+      const q = state.filters.search.trim().toLowerCase();
+      const filtered = cleaned.filter((b) => {
+        if (state.filters.category !== "ALL" && b.category !== state.filters.category) return false;
+        if (state.filters.status !== "ALL" && b.status !== state.filters.status) return false;
+        if (state.filters.date && b.date !== state.filters.date) return false;
+        if (q) {
+          const matchId = b.id.toLowerCase().includes(q);
+          const matchClient = b.client.toLowerCase().includes(q);
+          if (!matchId && !matchClient) return false;
+        }
+        return true;
+      });
+
+      // Sort
+      const sorted = [...filtered].sort((a, b) => {
+        const dir = state.sort.dir === "asc" ? 1 : -1;
+        const k = state.sort.key;
+        if (k === "revenue" || k === "duration") {
+          return (a[k] - b[k]) * dir;
+        }
+        return String(a[k]).localeCompare(String(b[k])) * dir;
+      });
+
+      if (sorted.length === 0) {
+        container.innerHTML = `
+          <div class="state-box">
+            <strong>No matching reservations</strong>
+            <p style="font-size:13px; color:var(--text-muted);">Try clearing your search query or filters, or create a new booking.</p>
+            <button type="button" class="btn btn-sm" onclick="resetTableFilters()">Reset Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      const sortArrow = (col) => (state.sort.key === col ? (state.sort.dir === "asc" ? " ▲" : " ▼") : "");
+
+      const rowsHtml = sorted.map((b) => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(b.id)}</strong>
+            ${b.hasConflict ? `<span class="badge badge-Cancelled" style="margin-left:4px;" title="Overlaps with ${b.conflictWith.join(", ")}">⚠ Overlap</span>` : ""}
+            ${b.hasCleaningNotes ? `<span class="badge badge-Pending" style="margin-left:4px;" title="Normalized during ingestion">Cleaned</span>` : ""}
+          </td>
+          <td>${escapeHtml(b.client)}</td>
+          <td><span class="badge badge-tier">${escapeHtml(b.category)}</span></td>
+          <td style="font-family:var(--font-mono); font-size:12px;">${escapeHtml(b.dateTime)}</td>
+          <td>${b.duration}h</td>
+          <td><strong>$${b.revenue.toLocaleString()}</strong></td>
+          <td><span class="badge badge-${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="btn btn-sm" onclick="openBookingModal('${b.id}')">Edit</button>
+              ${b.status !== "Cancelled" ? `<button type="button" class="btn btn-sm btn-danger-soft" onclick="cancelBookingById('${b.id}')">Cancel</button>` : ""}
+              <button type="button" class="btn btn-sm" onclick="deleteBookingById('${b.id}')" title="Delete record">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      container.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="setSortKey('id')">Booking ID${sortArrow("id")}</th>
+                <th onclick="setSortKey('client')">Client${sortArrow("client")}</th>
+                <th onclick="setSortKey('category')">Space Category${sortArrow("category")}</th>
+                <th onclick="setSortKey('dateTime')">Date / Time${sortArrow("dateTime")}</th>
+                <th onclick="setSortKey('duration')">Duration${sortArrow("duration")}</th>
+                <th onclick="setSortKey('revenue')">Revenue${sortArrow("revenue")}</th>
+                <th onclick="setSortKey('status')">Status${sortArrow("status")}</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderHygieneTab(cleaned, cleaningNotes, conflicts) {
+      const kpiGrid = document.getElementById("hygieneKpiGrid");
+      kpiGrid.innerHTML = `
+        <div class="kpi-card">
+          <span class="kpi-title">Validated Records</span>
+          <div class="kpi-value">${cleaned.length}</div>
+          <span style="font-size:12px; color:var(--text-muted);">100% conformant to canonical schema</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Auto-Cleaned / Normalized</span>
+          <div class="kpi-value" style="color:var(--accent-amber);">${cleaningNotes.length}</div>
+          <span style="font-size:12px; color:var(--text-muted);">Dates, missing fields & defaults</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Slot Conflict Warnings</span>
+          <div class="kpi-value" style="color:var(--accent-rose);">${conflicts.length}</div>
+          <span style="font-size:12px; color:var(--text-muted);">Same tier + overlapping time window</span>
+        </div>
+      `;
+
+      const conflictList = document.getElementById("conflictList");
+      if (conflicts.length === 0) {
+        conflictList.innerHTML = `<div class="issue-item"><strong>No slot overlaps detected.</strong> All active reservations in each workspace tier have non-overlapping schedules.</div>`;
+      } else {
+        conflictList.innerHTML = conflicts.map((c) => `
+          <div class="issue-item conflict">
+            <div style="display:flex; justify-content:space-between; font-weight:700;">
+              <span>${escapeHtml(c.category)} • ${escapeHtml(c.date)}</span>
+              <span>${c.overlapMinutes}m overlap</span>
+            </div>
+            <div><strong>${escapeHtml(c.bookingA)}</strong> (${escapeHtml(c.clientA)}, ${c.windowA}) overlaps with <strong>${escapeHtml(c.bookingB)}</strong> (${escapeHtml(c.clientB)}, ${c.windowB}).</div>
+          </div>
+        `).join("");
+      }
+
+      const cleaningLogList = document.getElementById("cleaningLogList");
+      if (cleaningNotes.length === 0) {
+        cleaningLogList.innerHTML = `<div class="issue-item"><strong>All records clean on arrival.</strong> No imputations or date normalizations needed.</div>`;
+      } else {
+        cleaningLogList.innerHTML = cleaningNotes.map((item) => `
+          <div class="issue-item cleaned">
+            <div style="font-weight:700;">${escapeHtml(item.id)} — ${escapeHtml(item.client)}</div>
+            <ul style="padding-left:18px; margin-top:3px;">
+              ${item.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("")}
+            </ul>
+          </div>
+        `).join("");
+      }
+
+      document.getElementById("schemaCodeBlock").textContent = JSON.stringify({
+        $schema: "https://geekshub.edu.eg/schemas/booking-log-v1.json",
+        table: "bookings",
+        columns: {
+          id: "VARCHAR(24) PRIMARY KEY -- e.g. 'BK-101'",
+          client: "VARCHAR(120) NOT NULL",
+          category: "ENUM('Shared Area', 'Meeting Room', 'Office') NOT NULL",
+          dateTime: "ISO-8601 / 'YYYY-MM-DD HH:MM' NOT NULL",
+          duration: "DECIMAL(4,1) CHECK (duration > 0) -- hours",
+          revenue: "DECIMAL(10,2) CHECK (revenue >= 0) -- USD",
+          status: "ENUM('Confirmed', 'Completed', 'Pending', 'Cancelled') NOT NULL"
+        }
+      }, null, 2);
+    }
+
+    /**
+     * =========================================================================
+     * 6. BUILT-IN UNIT TEST RUNNER & ARCHITECTURE DOCS (Milestone 4)
+     * =========================================================================
+     */
+    function runUnitTests() {
+      const results = [];
+      const assert = (name, condition, detail) => {
+        results.push({ name, passed: Boolean(condition), detail });
+      };
+
+      // Test 1: Date format normalization (DD/MM/YYYY -> YYYY-MM-DD HH:MM)
+      const d1 = normalizeDateTime("16/11/2026 10:30");
+      assert(
+        "Date Normalizer: Slash format to ISO date & 24h time",
+        d1.date === "2026-11-16" && d1.time === "10:30",
+        `Got date="${d1.date}", time="${d1.time}"`
+      );
+
+      // Test 2: Missing client & null revenue imputation
+      const cleanedSample = cleanAndValidateBookings([
+        { id: "T-1", client: "  ", category: "Meeting Room", dateTime: "2026-11-20 09:00", duration: 2, revenue: null, status: "Confirmed" }
+      ]).cleaned[0];
+      assert(
+        "Data Cleaner: Imputes blank client & estimates missing revenue",
+        cleanedSample.client.includes("Unassigned") && cleanedSample.revenue === 140,
+        `Client="${cleanedSample.client}", Revenue=$${cleanedSample.revenue}`
+      );
+
+      // Test 3: Overlapping slot conflict detection
+      const overlapRes = cleanAndValidateBookings([
+        { id: "C-1", client: "Alpha", category: "Office", dateTime: "2026-11-20 10:00", duration: 3, revenue: 200, status: "Confirmed" },
+        { id: "C-2", client: "Beta", category: "Office", dateTime: "2026-11-20 11:30", duration: 2, revenue: 150, status: "Confirmed" }
+      ]);
+      assert(
+        "Conflict Detector: Flags overlapping bookings in same workspace tier",
+        overlapRes.conflicts.length === 1 && overlapRes.cleaned[0].hasConflict && overlapRes.cleaned[1].hasConflict,
+        `Conflicts detected: ${overlapRes.conflicts.length}`
+      );
+
+      // Test 4: Cancellation rate & tier aggregation formula
+      const metrics = computeAnalytics([
+        { id: "M-1", client: "A", category: "Shared Area", date: "2026-11-20", time: "09:00", dateTime: "2026-11-20 09:00", startMinutes: 540, endMinutes: 660, duration: 2, revenue: 100, status: "Completed" },
+        { id: "M-2", client: "B", category: "Shared Area", date: "2026-11-20", time: "11:00", dateTime: "2026-11-20 11:00", startMinutes: 660, endMinutes: 720, duration: 1, revenue: 50, status: "Cancelled" }
+      ]);
+      assert(
+        "Analytics Engine: Calculates Cancellation Rate (50%) & Recognized Revenue ($100)",
+        Math.abs(metrics.cancellationRate - 50) < 0.001 && metrics.totalRevenue === 100,
+        `Cancellation=${metrics.cancellationRate}%, Revenue=$${metrics.totalRevenue}`
+      );
+
+      const passedCount = results.filter((r) => r.passed).length;
+      const banner = document.getElementById("testSummaryBanner");
+      banner.textContent = `${passedCount} / ${results.length} Unit Tests Passed`;
+      banner.style.color = passedCount === results.length ? "var(--accent-emerald)" : "var(--accent-rose)";
+
+      document.getElementById("testResultsList").innerHTML = results.map((r) => `
+        <div class="test-row">
+          <div>
+            <div style="font-weight:700;">${escapeHtml(r.name)}</div>
+            <div style="font-size:12px; color:var(--text-muted);">${escapeHtml(r.detail)}</div>
+          </div>
+          <span class="${r.passed ? "test-pass" : "test-fail"}">${r.passed ? "PASS" : "FAIL"}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderArchitectureDocs() {
+      document.getElementById("architectureDocBlock").textContent = [
+        "GIT BRANCHING WORKFLOW (Milestone 1 & 4)",
+        "----------------------------------------",
+        "main        ──●────────────●──────────▶ Production / Evaluated Release",
+        "              \\          /",
+        "dev         ───●────●───●──────●──────▶ Integration Branch",
+        "                \\  /          /",
+        "feature/schema   ●/          /",
+        "feature/analytics-pipeline  ●",
+        "",
+        "PIPELINE MODULES",
+        "----------------------------------------",
+        "1. Mock REST Simulator: Configurable latency (0-2000ms) & HTTP states (200/Loading/503/Empty)",
+        "2. Data Hygiene Engine: Date ISO normalization, missing value imputation, conflict detection",
+        "3. Analytics Aggregator: Occupancy %, Cancellation %, Peak Utilization Hour, Tier Revenue",
+        "4. UI & QA Suite: Responsive KPIs, SVG Charts, Filterable Table, Unit Test Runner"
+      ].join("\n");
+    }
+
+    /**
+     * =========================================================================
+     * 7. MODAL, CRUD & INTERACTION HANDLERS
+     * =========================================================================
+     */
+    function openBookingModal(bookingId = null) {
+      const backdrop = document.getElementById("bookingModalBackdrop");
+      const form = document.getElementById("bookingForm");
+      const title = document.getElementById("modalTitle");
+
+      if (bookingId) {
+        const existing = state.rawLogs.find((b) => b.id === bookingId);
+        if (!existing) return;
+        const cleanedRec = cleanAndValidateBookings([existing]).cleaned[0];
+        state.editingId = bookingId;
+        title.textContent = `Edit Reservation (${cleanedRec.id})`;
+        document.getElementById("fBookingId").value = cleanedRec.id;
+        document.getElementById("fBookingId").disabled = true;
+        document.getElementById("fClient").value = cleanedRec.client;
+        document.getElementById("fCategory").value = cleanedRec.category;
+        document.getElementById("fStatus").value = cleanedRec.status;
+        document.getElementById("fDate").value = cleanedRec.date;
+        document.getElementById("fTime").value = cleanedRec.time;
+        document.getElementById("fDuration").value = cleanedRec.duration;
+        document.getElementById("fRevenue").value = cleanedRec.revenue;
+      } else {
+        state.editingId = null;
+        title.textContent = "New Reservation";
+        form.reset();
+        const nextNum = 101 + state.rawLogs.length;
+        document.getElementById("fBookingId").value = `BK-${nextNum}`;
+        document.getElementById("fBookingId").disabled = false;
+        document.getElementById("fDate").value = "2026-11-20";
+        document.getElementById("fTime").value = "15:00";
+        document.getElementById("fDuration").value = "2";
+        document.getElementById("fRevenue").value = "140";
+      }
+
+      backdrop.classList.add("open");
+    }
+
+    function closeBookingModal() {
+      document.getElementById("bookingModalBackdrop").classList.remove("open");
+      state.editingId = null;
+    }
+
+    function handleBookingFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("fBookingId").value.trim().toUpperCase();
+      const client = document.getElementById("fClient").value.trim();
+      const category = document.getElementById("fCategory").value;
+      const status = document.getElementById("fStatus").value;
+      const date = document.getElementById("fDate").value;
+      const time = document.getElementById("fTime").value;
+      const duration = Number(document.getElementById("fDuration").value);
+      const revenue = Number(document.getElementById("fRevenue").value);
+
+      const record = {
+        id,
+        client,
+        category,
+        dateTime: `${date} ${time}`,
+        duration,
+        revenue,
+        status
+      };
+
+      if (state.editingId) {
+        state.rawLogs = state.rawLogs.map((item) => (item.id === state.editingId ? record : item));
+        showToastMessage(`Updated reservation ${id}.`);
+      } else {
+        if (state.rawLogs.some((item) => item.id.toUpperCase() === id)) {
+          record.id = `${id}-${Math.floor(Math.random() * 90 + 10)}`;
+        }
+        state.rawLogs.unshift(record);
+        showToastMessage(`Added reservation ${record.id} for ${client}.`);
+      }
+
+      if (state.simMode === "empty") {
+        state.simMode = "live";
+      }
+
+      closeBookingModal();
+      renderAll();
+    }
+
+    function cancelBookingById(id) {
+      state.rawLogs = state.rawLogs.map((b) => (b.id === id ? { ...b, status: "Cancelled" } : b));
+      showToastMessage(`Reservation ${id} marked as Cancelled.`);
+      renderAll();
+    }
+
+    function deleteBookingById(id) {
+      state.rawLogs = state.rawLogs.filter((b) => b.id !== id);
+      showToastMessage(`Deleted reservation ${id}.`);
+      renderAll();
+    }
+
+    function injectDirtyLogs() {
+      state.dirtyBatchCounter += 1;
+      const suffix = state.dirtyBatchCounter;
+      const batch = DIRTY_BATCH_SAMPLES.map((item, i) => ({
+        ...item,
+        id: `${item.id}-B${suffix}${i}`
+      }));
+      state.rawLogs = [...state.rawLogs, ...batch];
+      if (state.simMode === "empty") state.simMode = "live";
+      showToastMessage(`Injected ${batch.length} raw logs (mixed date formats, missing values & overlap) into pipeline.`);
+      renderAll();
+    }
+
+    function restoreDefaultDataset() {
+      state.rawLogs = JSON.parse(JSON.stringify(INITIAL_RAW_LOGS));
+      state.simMode = "live";
+      showToastMessage("Restored initial Geeks Hub reservation dataset.");
+      renderAll();
+    }
+
+    function switchSimMode(mode) {
+      state.simMode = mode;
+      updateSimulatorIndicator();
+      if (mode === "live") {
+        syncFromMockApi(false);
+      } else {
+        renderAll();
+      }
+    }
+
+    function setSortKey(key) {
+      if (state.sort.key === key) {
+        state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
+      } else {
+        state.sort.key = key;
+        state.sort.dir = "asc";
+      }
+      renderAll();
+    }
+
+    function resetTableFilters() {
+      state.filters = { search: "", category: "ALL", status: "ALL", date: "" };
+      document.getElementById("searchInput").value = "";
+      document.getElementById("categoryFilter").value = "ALL";
+      document.getElementById("statusFilter").value = "ALL";
+      document.getElementById("dateFilter").value = "";
+      renderAll();
+    }
+
+    function showToastMessage(msg, isError = false) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      if (isError) toast.style.borderLeftColor = "var(--accent-rose)";
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(8px)";
+        toast.style.transition = "all 200ms ease";
+        setTimeout(() => toast.remove(), 220);
+      }, 3200);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /**
+     * Master Render Function
+     */
+    function renderAll(overrideRaw = null) {
+      updateSimulatorIndicator();
+      const sourceLogs = overrideRaw !== null ? overrideRaw : state.rawLogs;
+      const { cleaned, cleaningNotes, conflicts } = cleanAndValidateBookings(sourceLogs);
+      const analytics = computeAnalytics(cleaned);
+
+      document.getElementById("tabBookingsCount").textContent = cleaned.length;
+      document.getElementById("tabIssuesCount").textContent = conflicts.length + cleaningNotes.length;
+
+      renderOverview(cleaned, analytics, conflicts, cleaningNotes);
+      renderBookingsTable(cleaned);
+      renderHygieneTab(cleaned, cleaningNotes, conflicts);
+    }
+
+    // Event Wiring
+    document.addEventListener("DOMContentLoaded", () => {
+      renderArchitectureDocs();
+      runUnitTests();
+      renderAll();
+
+      // Tabs
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const targetTab = btn.getAttribute("data-tab");
+          state.activeTab = targetTab;
+          document.querySelectorAll(".tab-btn").forEach((b) => {
+            const active = b.getAttribute("data-tab") === targetTab;
+            b.classList.toggle("active", active);
+            b.setAttribute("aria-selected", String(active));
+          });
+          document.querySelectorAll(".tab-panel").forEach((p) => {
+            p.classList.toggle("active", p.id === `panel-${targetTab}`);
+          });
+        });
+      });
+
+      // Mock REST controls
+      document.querySelectorAll("[data-sim-mode]").forEach((btn) => {
+        btn.addEventListener("click", () => switchSimMode(btn.getAttribute("data-sim-mode")));
+      });
+
+      const latencySlider = document.getElementById("latencySlider");
+      latencySlider.addEventListener("input", () => {
+        state.latencyMs = Number(latencySlider.value);
+        document.getElementById("latencyReadout").textContent = `${state.latencyMs}ms`;
+      });
+
+      document.getElementById("refetchBtn").addEventListener("click", () => syncFromMockApi(true));
+
+      // Trend metric toggle
+      document.querySelectorAll("#trendMetricToggle .seg-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.trendMetric = btn.getAttribute("data-metric");
+          document.querySelectorAll("#trendMetricToggle .seg-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const { cleaned } = cleanAndValidateBookings(state.rawLogs);
+          renderTrendChart(computeAnalytics(cleaned).dailySeries, state.trendMetric);
+        });
+      });
+
+      // Filters
+      document.getElementById("searchInput").addEventListener("input", (e) => {
+        state.filters.search = e.target.value;
+        renderAll();
+      });
+      document.getElementById("categoryFilter").addEventListener("change", (e) => {
+        state.filters.category = e.target.value;
+        renderAll();
+      });
+      document.getElementById("statusFilter").addEventListener("change", (e) => {
+        state.filters.status = e.target.value;
+        renderAll();
+      });
+      document.getElementById("dateFilter").addEventListener("change", (e) => {
+        state.filters.date = e.target.value;
+        renderAll();
+      });
+      document.getElementById("resetFiltersBtn").addEventListener("click", resetTableFilters);
+
+      // Modal & Actions
+      document.getElementById("openCreateModalBtn").addEventListener("click", () => openBookingModal(null));
+      document.getElementById("openCreateModalBtn2").addEventListener("click", () => openBookingModal(null));
+      document.getElementById("closeModalBtn").addEventListener("click", closeBookingModal);
+      document.getElementById("cancelModalBtn").addEventListener("click", closeBookingModal);
+      document.getElementById("bookingForm").addEventListener("submit", handleBookingFormSubmit);
+      document.getElementById("injectDirtyBtn").addEventListener("click", injectDirtyLogs);
+      document.getElementById("runTestsBtn").addEventListener("click", () => {
+        runUnitTests();
+        showToastMessage("Executed unit test suite.");
+      });
+
+      // Theme toggle
+      document.getElementById("themeToggleBtn").addEventListener("click", () => {
+        state.theme = state.theme === "light" ? "dark" : "light";
+        document.body.setAttribute("data-theme", state.theme);
+        document.getElementById("themeToggleBtn").textContent = state.theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode";
+      });
+    });
+  </script>
+</body>
+</html>
